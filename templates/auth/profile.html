@@ -1,0 +1,42 @@
+{% extends 'home/layout.html' %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<h2>Profile Page</h2>
+<div>
+    <p>Your account details are below:</p>
+    <table>
+        <tr>
+            <td>Username:</td>
+            <td>{{ username }}</td>
+        </tr>
+        <tr>
+            <td>Email:</td>
+            <td>{{ email }}</td>
+        </tr>
+        <tr>
+            <td>Phone<td>
+            <td>{{ phone }}</td>
+        </tr>
+    </table>
+    <p>Session ID: {{ session_id }}</p>
+
+    <!-- Add this form to your profile.html within the body tag -->
+<h2>Update Password</h2>
+<form action="/update_password" method="post">
+    Old Password: <input type="password" name="old_password"><br>
+    New Password: <input type="password" name="new_password"><br>
+    <input type="submit" value="Update Password">
+</form>
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    {% for category, message in messages %}
+      <div class="flash-{{ category }}">{{ message }}</div>
+    {% endfor %}
+  {% endif %}
+{% endwith %}
+
+</div>
+
+{% endblock %}

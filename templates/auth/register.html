@@ -1,0 +1,82 @@
+{% extends 'auth/auth_layout.html' %}
+{% block title %}{{ title }}{% endblock %}
+{% block content%}
+<header>
+    <nav class="navbar">
+        <div class="container">
+            <a href="/" class="logo">BMW</a>
+            <div class="navbar-links">
+                <a href="#">Models</a>
+            </div>
+        </div>
+    </nav>
+</header>
+
+<div class="register">
+    {% include "includes/alert.html" %}
+    <h1>Register</h1>
+    <div class="links">
+        <a href="{{ url_for('login') }}">Login</a>
+        <a href="{{ url_for('register') }}" class="active">Register</a>
+    </div>
+    <form action="{{ url_for('register') }}" method="post" autocomplete="off">
+        <!-- Username Field -->
+        <div class="form-group">
+            <div class="input-icon">
+                <label for="username"><i class="fas fa-user"></i></label>
+                <input type="text" name="username" placeholder="Username" id="username" required>
+                {% if validation_errors.username %}
+                    <div class="error">{{ validation_errors.username }}</div>
+                {% endif %}
+            </div>
+        </div>
+        
+        <!-- Password Field -->
+        <div class="form-group">
+            <div class="input-icon">
+                <label for="password"><i class="fas fa-lock"></i></label>
+                <input type="password" name="password" placeholder="Password" id="password" required>
+                {% if validation_errors.password %}
+                    <div class="error">{{ validation_errors.password }}</div>
+                {% endif %}
+            </div>
+        </div>
+        
+        <!-- Confirm Password Field -->
+        <div class="form-group">
+            <div class="input-icon">
+                <label for="confirm_password"><i class="fas fa-lock"></i></label>
+                <input type="password" name="confirm_password" placeholder="Confirm Password" id="confirm_password" required>
+                {% if validation_errors.confirm_password %}
+                    <div class="error">{{ validation_errors.confirm_password }}</div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Email Field -->
+        <div class="form-group">
+            <div class="input-icon">
+                <label for="email"><i class="fas fa-envelope"></i></label>
+                <input type="email" name="email" placeholder="Email" id="email" required>
+                {% if validation_errors.email %}
+                    <div class="error">{{ validation_errors.email }}</div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Phone Field -->
+        <div class="form-group">
+            <div class="input-icon">
+                <label for="phone"><i class="fas fa-phone"></i></label>
+                <input type="text" name="phone" placeholder="Phone" id="phone" required>
+                {% if validation_errors.phone %}
+                    <div class="error">{{ validation_errors.phone }}</div>
+                {% endif %}
+            </div>
+        </div>
+        
+        <!-- Submit Button -->
+        <input type="submit" value="Register">
+    </form>
+</div>
+{% endblock %}

@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BMW Showcase</title>
+    <link rel="stylesheet" href="static/style.css">
+    <style>/* General Body Styles */      
+        
+        </style>
+</head>
+<body>
+    <header>
+        <nav class="navbar">
+            <div class="container">
+                <a href="/" class="logo">BMW</a>
+                <div class="navbar-links">
+                    <a href="#">Models</a>
+                    <!-- Add login and signup buttons -->
+                    <a href="/pythonlogin/" class="btn-login">Login</a>
+                    <a href="/pythonlogin/register" class="btn-signup">Signup</a>    
+                    <a href="{{ url_for('admin_login') }}" class="btn-signup">Admin Login</a>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        <section class="hero">
+            <div class="container">
+                <h1>Welcome to BMW</h1>
+                <p>Explore the world of BMW, built on automotive brilliance and unrivaled experiences.</p>
+            </div>
+        </section>
+
+        <section class="models">
+            <div class="container">
+                <h2>Our Models</h2>
+                <div class="model-grid">
+                    <!-- Example model, replicate this block for other models -->
+                    <div class="model">
+                        <img src="path_to_your_image.jpg" alt="BMW Model">
+                        <h3>Model Name</h3>
+                        <p>Description of the model.</p>
+                    </div>
+                    <div class="model">
+                        <img src="path_to_your_image.jpg" alt="BMW Model">
+                        <h3>Model Name</h3>
+                        <p>Description of the model.</p>
+                    </div>
+                    <div class="model">
+                        <img src="path_to_your_image.jpg" alt="BMW Model">
+                        <h3>Model Name</h3>
+                        <p>Description of the model.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2024 BMW</p>
+        </div>
+    </footer>
+</body>
+</html>

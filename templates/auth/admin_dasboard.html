@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        .sidebar {
+            float: left;
+            width: 200px;
+            height: 100vh;
+            background-color: #f0f0f0;
+            padding: 20px;
+        }
+        .content {
+            margin-left: 220px;
+            padding: 20px;
+        }
+        .sidebar a {
+            display: block;
+            color: black;
+            padding: 10px;
+            text-decoration: none;
+        }
+        .sidebar a:hover {
+            background-color: #ddd;
+        }
+    </style>
+</head>
+<body>
+
+<div class="sidebar">
+    <h3>Admin Menu</h3>
+    <a href="#">Dashboard</a>
+    <a href="#">User Management</a>
+    <a href="#">Content Management</a>
+    <a href="#">Analytics</a>
+    <a href="#">Settings</a>
+</div>
+
+<div class="content">
+    <h2>Welcome, Admin!</h2>
+    <p>This is your dashboard, from where you can manage users, view analytics, update content, and configure settings.</p>
+    <!-- Placeholders for different sections -->
+    <div id="user-management">
+        <h3>User Management</h3>
+        <p>Manage user accounts, roles, and permissions.</p>
+    </div>
+    <div id="content-management">
+        <h3>Content Management</h3>
+        <p>Create, update, and delete articles, posts, and pages.</p>
+    </div>
+    <div id="analytics">
+        <h3>Analytics</h3>
+        <p>View website traffic, user engagement, and performance metrics.</p>
+    </div>
+    <div id="settings">
+        <h3>Settings</h3>
+        <p>Configure application settings, payment gateways, and more.</p>
+    </div>
+</div>
+
+</body>
+</html>
