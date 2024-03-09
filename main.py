@@ -218,7 +218,39 @@ def admin_dashboard():
         # If not, redirect to the login page
         return redirect(url_for('admin_login'))
     # If logged in, show the dashboard
-    return 'Admin Dashboard - Welcome!'
+    return render_template('admin_dashboard.html')
+
+# Add this route for the logout functionality
+@app.route('/admin_dashboard/logout')
+def admin_logout():
+    # Remove user info from the session
+    session.pop('logged_in', None)
+    # Redirect to login page
+    return redirect(url_for('admin_login'))
+
+# ... (existing code)
+
+# Add this route to display all users in the user management section
+@app.route('/admin_dashboard/users')
+def display_users():
+    # Check if the user is logged in
+    if not session.get('logged_in'):
+        # If not, redirect to the login page
+        return redirect(url_for('admin_login'))
+
+    # Fetch all users from the database (replace this with your actual data fetching logic)
+    cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+    cursor.execute('SELECT * FROM accounts')
+    users = cursor.fetchall()
+
+    # Render the template with user data
+    return render_template('users.html', users=users, title="User Management")
+
+@app.route('/models/')
+def models():
+    return render_template('models.html')
+
+
 
 if __name__ =='__main__':
 	app.run(debug=True)
