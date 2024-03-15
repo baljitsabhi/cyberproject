@@ -4,8 +4,12 @@ import MySQLdb.cursors
 import re
 import uuid
 import bcrypt 
+from flask_mail import Mail, Message
+import random
 
 app = Flask(__name__)
+mail = Mail(app)
+
 
 # Change this to your secret key (can be anything, it's for extra protection)
 app.secret_key = '1a2b3c4d5e6d7g8h9i10'
@@ -15,6 +19,18 @@ app.config['MYSQL_HOST'] = 'localhost'
 app.config['MYSQL_USER'] = 'root'
 app.config['MYSQL_PASSWORD'] = 'abc123' #Replace ******* with  your database password.
 app.config['MYSQL_DB'] = 'loginapp'
+
+# Mail configuration - Updated with your details
+app.config['MAIL_SERVER'] = 'smtp.gmail.com'  # Gmail's SMTP server
+app.config['MAIL_PORT'] = 587
+app.config['MAIL_USE_TLS'] = True
+app.config['MAIL_USE_SSL'] = False
+app.config['MAIL_USERNAME'] = 'group6vu@gmail.com'
+app.config['MAIL_PASSWORD'] = 'pnjj rljx lpic igjr'  # Consider using app-specific passwords for better security
+app.config['MAIL_DEFAULT_SENDER'] = 'group6vu@gmail.com'
+
+# Initialize Flask extensions
+mail.init_app(app)
 
 
 # Intialize MySQL
@@ -55,6 +71,14 @@ def login():
     
     return render_template('auth/login.html', title="Login")
 
+
+# Define the send_verification_email function
+def send_verification_email(email, code):
+    msg = Message(subject="Verify Your Email Address",
+                  sender=app.config['MAIL_DEFAULT_SENDER'],
+                  recipients=[email],
+                  body=f"Your verification code is: {code}")
+    mail.send(msg)
 
 # http://localhost:5000/pythonlogin/register 
 # This will be the registration page, we need to use both GET and POST requests
@@ -107,21 +131,47 @@ def register():
         # If there are any errors, render the template with validation_errors
         if any(value for value in validation_errors.values()):
             return render_template('auth/register.html', title="Register", validation_errors=validation_errors)
-
         
+        # After all validations pass:
+        verification_code = str(random.randint(100000, 999999))  # Generate a 6-digit verification code
+        session['verification_code'] = verification_code  # Store the code in the session
+        session['temp_user'] = {'username': username, 'password': password, 'email': email, 'phone': phone}  # Temporarily store user details
+        
+        send_verification_email(email, verification_code)  # Send the verification code via email
+        
+        flash("Verification code sent to your email. Please enter the code to complete registration.", "info")
+        return redirect(url_for('verify'))  # Redirect to verification page (you need to create this route and template)
 
-        # Hash the password before storing it
-        hashed_password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
+    return render_template('auth/register.html', title="Register", validation_errors=validation_errors)
 
-        # Validation passed, insert new account with hashed password
-        cursor.execute('INSERT INTO accounts (username, email, password, phone) VALUES (%s, %s, %s, %s)', (username, email, hashed_password.decode('utf-8'), phone))
-        mysql.connection.commit()
-        flash("You have successfully registered!", "success")
-        return redirect(url_for('login'))
-    else:
-        # Handle GET requests or incomplete POST requests
-        flash("Please fill out the form!", "danger")
-    return render_template('auth/register.html', title="Register",validation_errors=validation_errors)
+# Add a new route for the verification page where users input the verification code
+@app.route('/verify', methods=['GET', 'POST'])
+def verify():
+    if request.method == 'POST':
+        user_code = request.form['verification_code']
+        if 'verification_code' in session and user_code == session['verification_code']:
+            # Verification code matches, proceed with registration
+            user_details = session.pop('temp_user', None)
+            if user_details:
+                # Insert user into the database here using user_details
+                # Make sure to hash the password before storing it
+                hashed_password = bcrypt.hashpw(user_details['password'].encode('utf-8'), bcrypt.gensalt())
+                cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+                cursor.execute('INSERT INTO accounts (username, email, password, phone) VALUES (%s, %s, %s, %s)',
+                               (user_details['username'], user_details['email'], hashed_password.decode('utf-8'), user_details['phone']))
+                mysql.connection.commit()
+                flash("You have successfully registered!", "success")
+                return redirect(url_for('login'))
+            else:
+                flash("Session expired. Please register again.", "error")
+                return redirect(url_for('register'))
+        else:
+            flash("Invalid verification code. Please try again.", "danger")
+            return render_template('verify.html')  # Show the verification form again
+
+    return render_template('verify.html')  # The initial GET request to show the form
+
+
 
 # http://localhost:5000/pythinlogin/home 
 # This will be the home page, only accessible for loggedin users
