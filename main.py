@@ -43,33 +43,76 @@ def index():
 # http://localhost:5000/pythonlogin/ - this will be the login page, we need to use both GET and POST requests
 @app.route('/pythonlogin/', methods=['GET', 'POST'])
 def login():
-    # Check if "username" and "password" POST requests exist (user submitted form)
+    # Existing login logic
     if request.method == 'POST' and 'username' in request.form and 'password' in request.form:
-        # Create variables for easy access
         username = request.form['username']
         password = request.form['password']
+        # Initialize account variable
+        account = None
         
         # Check if account exists using MySQL
         cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
         cursor.execute('SELECT * FROM accounts WHERE username = %s', [username])
-        # Fetch one record and return result
         account = cursor.fetchone()
+
+        # Your existing account verification logic
         
-        # If account exists in accounts table in our database
         if account and bcrypt.checkpw(password.encode('utf-8'), account['password'].encode('utf-8')):
-            # Create session data, we can access this data in other routes
-            session['loggedin'] = True
-            session['id'] = account['id']
-            session['username'] = account['username']
-            session['user_id'] = str(uuid.uuid4())  # Generate a unique session ID
+            # Instead of logging the user in immediately, send a verification code
+            verification_code = str(random.randint(1000, 9999))  # Generate a 4-digit code
+            session['verification_code'] = verification_code  # Store the code in the session
+            session['temp_user'] = account['id']  # Temporarily store the user ID
             
-            # Redirect to home page
-            return redirect(url_for('home'))
+            # Use your send_verification_email function to send the code
+            send_verification_email(account['email'], verification_code)
+            
+            # Redirect to a new route for code verification
+            return redirect(url_for('verify_login'))
         else:
             # Account doesn't exist or username/password incorrect
             flash("Incorrect username/password!", "danger")
     
     return render_template('auth/login.html', title="Login")
+
+@app.route('/verify_login', methods=['GET', 'POST'])
+def verify_login():
+    if request.method == 'POST':
+        # Retrieve the user-provided code from the form
+        user_code = request.form.get('code')
+        
+        # Check if the provided code matches the code stored in the session
+        if 'verification_code' in session and user_code == session['verification_code']:
+            # Retrieve the temporarily stored user ID
+            user_id = session.pop('temp_user', None)
+            # Remove the verification code from the session
+            session.pop('verification_code', None)
+            
+            if user_id:
+                # Fetch the user's details from the database using the user_id
+                cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+                cursor.execute('SELECT * FROM accounts WHERE id = %s', [user_id])
+                account = cursor.fetchone()
+                
+                # Assuming the account is found, set the necessary session variables
+                if account:
+                    session['loggedin'] = True
+                    session['id'] = account['id']
+                    session['username'] = account['username']
+                    
+                    # Redirect to the home page or another appropriate page
+                    return redirect(url_for('home'))
+                else:
+                    flash("Account not found. Please try again.", "error")
+                    return redirect(url_for('login'))
+            else:
+                flash("Session expired. Please log in again.", "error")
+                return redirect(url_for('login'))
+        else:
+            # The verification code does not match
+            flash("Invalid verification code. Please try again.", "error")
+            
+    # For GET requests or if verification fails, render the verification code entry page again
+    return render_template('verify_login.html')
 
 
 # Define the send_verification_email function

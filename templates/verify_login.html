@@ -1,0 +1,30 @@
+{% extends 'auth/auth_layout.html' %}
+
+{% block title %}
+    Enter Verification Code
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <header>
+        <h1>Verification Required</h1>
+        <p>Please enter the verification code sent to your email to continue.</p>
+    </header>
+    <div class="verification-form">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        <form action="{{ url_for('verify_login') }}" method="post">
+            <div class="form-group">
+                <label for="code">Verification Code:</label>
+                <input type="text" id="code" name="code" placeholder="Enter code" required class="form-control">
+            </div>
+            <button type="submit" class="btn">Verify</button>
+        </form>
+    </div>
+</div>
+{% endblock %}
