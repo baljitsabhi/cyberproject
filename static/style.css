@@ -256,3 +256,23 @@ body.loggedin {
 }
 /* Add this to your existing CSS or create a new CSS file */
 
+.suggestions-container {
+  border: 1px solid #ddd;
+  border-top: none;
+  background-color: #fff;
+  position: absolute;
+  width: calc(100% - 2px);
+  max-height: 200px;
+  overflow-y: auto;
+  z-index: 1000;
+}
+
+.suggestions-container div {
+  padding: 10px;
+  cursor: pointer;
+  background-color: #000;
+}
+
+.suggestions-container div:hover {
+  background-color: #f2f2f2;
+}
