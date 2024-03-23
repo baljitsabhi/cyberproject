@@ -294,15 +294,19 @@ def admin_login():
         password = request.form['password']
         
         # Check if credentials match the specified admin credentials
-        if username == 'Baljit' and password == 'VUsydney':
+        if username == 'User' and password == 'Password123':
             session['logged_in'] = True
+            # Redirect to admin dashboard if successful
+            # This assumes the redirection itself doesn't cause issues with Hydra's detection mechanism
             return redirect(url_for('admin_dashboard'))
         else:
-            # Ideally, you would want to give a generic error message here to avoid giving hints to potential attackers
-            return 'Invalid credentials', 401
+            # Return a 200 OK status code with a specific message indicating login failure
+            # This replaces the previous 401 Unauthorized status code
+            return 'Invalid credentials, please try again.', 200  # Note the 200 status code here
 
     # For GET requests, show the login form
     return render_template('admin_login.html')
+
 
 @app.route('/admin_dashboard')
 def admin_dashboard():
