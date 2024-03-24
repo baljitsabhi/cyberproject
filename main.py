@@ -287,41 +287,88 @@ def logout():
     return redirect(url_for('login'))
 
 
+
 @app.route('/admin_login', methods=['GET', 'POST'])
 def admin_login():
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
         
-        # Check if credentials match the specified admin credentials
-        if username == 'User' and password == 'Password123':
-            session['logged_in'] = True
-            # Redirect to admin dashboard if successful
-            # This assumes the redirection itself doesn't cause issues with Hydra's detection mechanism
-            return redirect(url_for('admin_dashboard'))
-        else:
-            # Return a 200 OK status code with a specific message indicating login failure
-            # This replaces the previous 401 Unauthorized status code
-            return 'Invalid credentials, please try again.', 200  # Note the 200 status code here
+        # Check if account exists using MySQL
+        cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+        cursor.execute('SELECT * FROM admin_accounts WHERE username = %s', [username])
+        account = cursor.fetchone()
 
-    # For GET requests, show the login form
+        if account and account['password'] == password:
+            # Password is correct
+            # Send a verification code
+            verification_code = str(random.randint(1000, 9999))
+            session['admin_verification_code'] = verification_code
+            session['temp_admin'] = account['id']
+            
+            send_verification_email(account['email'], verification_code)
+            
+            return redirect(url_for('verify_admin_login'))
+        else:
+            # Password is incorrect or account doesn't exist
+            flash("Incorrect username/password!", "danger")
+
     return render_template('admin_login.html')
+
+@app.route('/verify_admin_login', methods=['GET', 'POST'])
+def verify_admin_login():
+    # Check if it's a POST request indicating form submission.
+    if request.method == 'POST':
+        # Retrieve the user-provided code from the form.
+        user_code = request.form.get('code')
+
+        # Check if the provided code matches the code stored in the session.
+        if 'admin_verification_code' in session and user_code == session['admin_verification_code']:
+            # Code matches, retrieve the temporarily stored admin ID.
+            admin_id = session.pop('temp_admin', None)
+            # Also remove the verification code from the session to clean up.
+            session.pop('admin_verification_code', None)
+
+            if admin_id:
+                # Optionally, fetch additional admin details from the database.
+                cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+                cursor.execute('SELECT * FROM admin_accounts WHERE id = %s', [admin_id])
+                account = cursor.fetchone()
+
+                # Set necessary session variables to keep the admin logged in.
+                session['admin_logged_in'] = True
+                session['admin_id'] = account['id']
+                session['admin_username'] = account['username']
+                
+                # Redirect to the admin dashboard or another admin-specific page.
+                return redirect(url_for('admin_dashboard'))
+            else:
+                flash("Session expired. Please log in again.", "error")
+                return redirect(url_for('admin_login'))
+        else:
+            # The verification code does not match.
+            flash("Invalid verification code. Please try again.", "error")
+    
+    # For GET requests or if the code verification fails, show the verification code entry page again.
+    return render_template('verify_admin_login.html')
+
 
 
 @app.route('/admin_dashboard')
 def admin_dashboard():
     # Check if the user is logged in
-    if not session.get('logged_in'):
+    if not session.get('admin_logged_in'):  # Corrected variable name
         # If not, redirect to the login page
         return redirect(url_for('admin_login'))
     # If logged in, show the dashboard
     return render_template('admin_dashboard.html')
 
+
 # Add this route for the logout functionality
 @app.route('/admin_dashboard/logout')
 def admin_logout():
     # Remove user info from the session
-    session.pop('logged_in', None)
+    session.pop('admin_logged_in', None)
     # Redirect to login page
     return redirect(url_for('admin_login'))
 
@@ -331,7 +378,7 @@ def admin_logout():
 @app.route('/admin_dashboard/users')
 def display_users():
     # Check if the user is logged in
-    if not session.get('logged_in'):
+    if not session.get('admin_logged_in'):
         # If not, redirect to the login page
         return redirect(url_for('admin_login'))
 
