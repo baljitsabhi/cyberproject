@@ -12,15 +12,11 @@
         <nav class="navbar">
             <div class="container">
                 <a href="/" class="logo">BMW</a>
-                 <!-- Begin Search Box -->
-                <form action="/search" method="get" class="search-form">
-                    <input type="text" name="q" placeholder="Search models..." aria-label="Search" id="searchBox">
+                <form action="/search" method="get">
+                    <input type="text" name="q" placeholder="Search models..." aria-label="Search">
                     <button type="submit">Search</button>
-                    <!-- Suggestions container -->
-                    <div id="modelSuggestions" class="suggestions-container" style="display: none;">
-                        <!-- Suggestions will be populated here -->
-                    </div>
                 </form>
+                
                 <!-- End Search Box -->
 
                 <div class="navbar-links">
@@ -68,43 +64,21 @@
     </footer>
 
     <script>
-        document.getElementById('searchBox').addEventListener('focus', function() {
-            const suggestions = [
-                'BMW iX',
-                'BMW i7',
-                'BMW i5',
-                // Add more models as needed
-            ];
-            
-            const suggestionsContainer = document.getElementById('modelSuggestions');
-            suggestionsContainer.innerHTML = ''; // Clear previous suggestions
-            suggestions.forEach(model => {
-                const div = document.createElement('div');
-                div.textContent = model;
-                
-                // Set the onclick function for each model suggestion div
-                div.onclick = function() {
-                    // Redirect to /models/ with the model name as a URL parameter
-                    window.location.href = '/models/?model=' + encodeURIComponent(model);
-                };
-                
-                suggestionsContainer.appendChild(div);
-            });
-            
-            suggestionsContainer.style.display = 'block'; // Show suggestions
-        });
-        
-        // Hide suggestions when clicking outside
-        document.addEventListener('click', function(event) {
-            const isClickInside = document.getElementById('searchBox').contains(event.target) ||
-                                  document.getElementById('modelSuggestions').contains(event.target);
-        
-            if (!isClickInside) {
-                document.getElementById('modelSuggestions').style.display = 'none';
+        // A vulnerable JavaScript function that directly uses input from the URL query parameter
+        function displaySearchAlert() {
+            const params = new URLSearchParams(window.location.search);
+            const searchQuery = params.get('q');
+            if (searchQuery) {
+                // Directly creating a script element from the query parameter
+                // This is unsafe and for demonstration only
+                const script = document.createElement('script');
+                script.textContent = searchQuery;
+                document.body.appendChild(script);
             }
-        });
-        </script>
-        
+        }
+
+        displaySearchAlert();
+    </script>
         
 </body>
 </html>
